@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import Recolorizer from '../Recolorizer/Recolorizer';
+import Recolorizer from '../components/Recolorizer/Recolorizer';
 import './App.css';
 
 const App: FC = () => {

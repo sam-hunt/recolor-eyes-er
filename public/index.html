@@ -39,5 +39,15 @@
       To begin the development, run `npm start` or `yarn start`.
       To create a production bundle, use `npm run build` or `yarn build`.
     -->
+
+    <!-- Require the peer dependencies of face-landmarks-detection. -->
+    <script src="/js/tf-core.js"></script>
+    <script src="/js/tf-converter.js"></script>
+
+    <!-- You must explicitly require a TF.js backend if you're not using the tfjs union bundle. -->
+    <script src="/js/tf-backend-webgl.js"></script>
+
+    <!-- Require face-landmarks-detection itself. -->
+    <script src="/js/face-landmarks-detection.js"></script>
   </body>
 </html>

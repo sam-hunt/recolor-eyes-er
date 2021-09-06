@@ -1,4 +1,10 @@
-import { FC, useRef, useEffect } from 'react';
+import { FC, useRef, useEffect, useCallback } from 'react';
+import { usePromise } from '../../hooks/use-promise';
+
+declare const faceLandmarksDetection: {
+    load: (supportedPackage: unknown) => Promise<unknown>;
+    SupportedPackages: { mediapipeFacemesh: unknown };
+};
 
 const Recolorizer: FC = () => {
 
@@ -10,10 +16,16 @@ const Recolorizer: FC = () => {
 
     const videoEl = videoRef.current;
 
-    
+    const [model, modelError, modelIsPending] = usePromise<unknown | null>(
+        useCallback(() => faceLandmarksDetection.load(faceLandmarksDetection.SupportedPackages.mediapipeFacemesh), []), null,
+    );
+
+    const isLoading = !canvasEl || !videoEl || !model;
+
+
     useEffect(() => {
-        const constraints = { video: { width: 1280, height: 720 } };
-        if (!canvasEl || !videoEl) return;
+        if (isLoading) return;
+
         const playListener = () => {
             let lastTimeCalled = performance.now();
             let now = performance.now();
@@ -37,8 +49,9 @@ const Recolorizer: FC = () => {
             }
             requestAnimationFrame(step);
         };
+
         window.navigator.mediaDevices
-            .getUserMedia(constraints)
+            .getUserMedia({ video: { width: 1280, height: 720 } })
             .then(stream => {
                 videoEl.addEventListener('play', playListener);
                 videoEl.srcObject = stream;
@@ -51,14 +64,18 @@ const Recolorizer: FC = () => {
         return () => {
             videoEl.removeEventListener('play', playListener);
         };
-    }, [canvasEl, videoEl, ctx]);
+    }, [canvasEl, videoEl, ctx, model]);
 
     return (
         <div>
-            <div id="container">
-                <video ref={videoRef} muted hidden></video>
+            <video ref={videoRef} muted hidden></video>
+            <div>
+                {modelIsPending && <div style={{ color: 'primary' }}>Model is loading...<br /><br /></div>}
+                {modelError && <div style={{ color: 'red', fontWeight: 'bold' }}>Failed to load model.<br />{modelError}<br /><br /></div>}
+                {model && <div style={{ color: 'var(--accent-color)' }}>Model is loaded.<br /><br /></div>}
             </div>
             <canvas ref={canvasRef} width={1280} height={720}></canvas>
+
         </div>
     );
 };
